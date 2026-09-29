@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#121316">
+<title>Vándor Krónikák</title>
+<style>
+:root {
+  --bg: #111214;
+  --panel: #1a1c21;
+  --panel-2: #14161a;
+  --line: #2a2e36;
+  --accent: #d4a373;
+  --accent-soft: rgba(212, 163, 115, .14);
+  --text: #e7e5e1;
+  --muted: #8e919a;
+  --hp: #e76f51;
+  --sus: #e9c46a;
+  --renown: #b48ead;
+  --ok: #2a9d8f;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  padding: 12px 12px 24px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.45;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+/* Karakterlap */
+.hero { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.hero h1 { margin: 0; font-size: 1.1rem; color: var(--accent); letter-spacing: .01em; }
+.hero .act { font-size: .75rem; color: var(--muted); text-align: right; }
+.bars { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bar-label { display: flex; justify-content: space-between; font-size: .78rem; color: var(--muted); }
+.bar-label b { color: var(--text); font-weight: 600; }
+.bar { height: 5px; background: #2a2d34; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.bar > div { height: 100%; transition: width .4s; }
+.bar .hp { background: var(--hp); }
+.bar .sus { background: var(--sus); }
+.bar .prog { background: var(--accent); }
+.chips { display: flex; gap: 14px; margin-top: 10px; font-size: .82rem; color: var(--muted); }
+.chips b { color: var(--text); font-weight: 600; }
+.progress { margin-top: 10px; }
+.banner {
+  display: none; margin-top: 10px; padding: 9px 10px; border-radius: 10px; font-size: .84rem;
+  background: #2b1a17; border: 1px solid var(--hp); color: #f3c3b6;
+}
+.banner.good { background: #16241f; border-color: var(--ok); color: #bfe3dc; }
+.banner.info { background: var(--accent-soft); border-color: var(--accent); color: var(--text); }
+.banner button { margin-top: 6px; }
+
+/* Űrlap */
+label.lbl { display: block; font-size: .75rem; color: var(--muted); margin: 0 0 4px; letter-spacing: .02em; }
+input[type="text"] {
+  width: 100%; padding: 10px 11px; font-size: 1rem;
+  background: var(--panel-2); color: #fff;
+  border: 1px solid #30343d; border-radius: 10px;
+}
+input[type="text"]:focus { outline: none; border-color: var(--accent); }
+.row { margin-bottom: 12px; }
+.pills { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pills label { cursor: pointer; }
+.pills input { position: absolute; opacity: 0; pointer-events: none; }
+.pills span {
+  display: block; text-align: center; padding: 8px 6px; border-radius: 10px;
+  background: var(--panel-2); border: 1px solid #30343d; font-size: .88rem;
+}
+.pills input:checked + span { border-color: var(--accent); background: var(--accent-soft); color: #fff; }
+.pills input:focus-visible + span { outline: 2px solid var(--accent); }
+input[type="file"] { display: none; }
+.photo-btn {
+  display: block; padding: 11px; text-align: center; cursor: pointer;
+  border: 1px dashed var(--accent); border-radius: 10px; font-size: .9rem;
+  background: var(--panel-2);
+}
+.nums { display: grid; grid-template-columns: 1.2fr 1fr .8fr 1.2fr 1fr; gap: 5px; }
+.nums input { text-align: center; padding: 9px 4px; font-variant-numeric: tabular-nums; }
+.nums label.lbl { text-align: center; margin-bottom: 3px; }
+.btn {
+  display: block; width: 100%; border: none; cursor: pointer;
+  background: var(--accent); color: #17130e;
+  padding: 13px; border-radius: 12px; font-size: 1rem; font-weight: 700;
+  text-align: center; text-decoration: none;
+}
+.btn:active { transform: scale(.98); }
+.btn.ghost { background: var(--panel-2); color: var(--text); border: 1px solid #30343d; font-weight: 600; }
+.btn.small { padding: 9px; font-size: .9rem; }
+.btn + .btn { margin-top: 8px; }
+.error-box {
+  display: none; margin-top: 10px; padding: 10px; border-radius: 10px; font-size: .86rem;
+  background: #2b1a17; border: 1px solid var(--hp); color: #f3c3b6; white-space: pre-wrap;
+}
+.card-open { display: none; margin-top: 8px; }
+
+/* Lábléc */
+.footer { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 14px; margin-top: 12px; }
+.link-btn { background: none; border: none; color: var(--muted); font-size: .82rem; cursor: pointer; padding: 4px; }
+.link-btn:hover { color: var(--text); }
+
+/* Felugró ablakok */
+dialog {
+  border: none; padding: 0; background: transparent; color: var(--text);
+  width: min(520px, 100vw); max-width: 100vw; max-height: 100dvh; margin: auto;
+}
+dialog::backdrop { background: rgba(0, 0, 0, .72); }
+.sheet {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+  margin: 10px; max-height: calc(100dvh - 20px); display: flex; flex-direction: column;
+}
+.sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.sheet-head h2 { margin: 0; font-size: 1rem; color: var(--accent); }
+.x { background: none; border: none; color: var(--text); font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 2px 6px; }
+.sheet-body { padding: 14px; overflow-y: auto; }
+.copied { font-size: .8rem; color: var(--ok); text-align: center; min-height: 1.1em; margin-top: 6px; }
+.note { font-size: .8rem; color: var(--muted); margin: 8px 0 0; }
+.warn { font-size: .8rem; color: var(--sus); margin-top: 8px; }
+.sheet ol, .sheet ul { padding-left: 18px; margin: 0; font-size: .88rem; }
+.sheet li { margin-bottom: 7px; }
+
+/* Napló */
+.chapter { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px dashed var(--line); }
+.chapter:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.chapter-head { font-size: .76rem; color: var(--accent); margin-bottom: 4px; }
+.chapter-action { font-size: .84rem; color: var(--muted); font-style: italic; margin-bottom: 4px; }
+.chapter-mech {
+  font-size: .8rem; color: #b9c7c4; background: #15191b; border-left: 2px solid var(--ok);
+  padding: 6px 8px; border-radius: 4px; white-space: pre-wrap;
+}
+.chapter-text { white-space: pre-wrap; font-size: .92rem; }
+
+/* Mesélő-kártya: világos, nagy kontrasztú, képernyőfotóra tervezve */
+.gm-card {
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  background: #f6efdf; color: #1d1a16; border: 2px solid #b0895a; border-radius: 12px;
+  padding: 12px; font-size: 14.5px; line-height: 1.35;
+}
+.gm-head { font-weight: 700; font-size: 14px; color: #6b4a22; margin-bottom: 8px; }
+.gm-photo { display: block; max-width: 100%; max-height: 220px; margin: 0 auto 8px; border-radius: 8px; border: 1px solid #c9b391; }
+.gm-row { display: grid; grid-template-columns: 92px 1fr; gap: 8px; padding: 3px 0; border-top: 1px solid #e2d5bb; }
+.gm-row:first-of-type { border-top: none; }
+.gm-label { font-weight: 700; color: #6b4a22; font-size: 12.5px; }
+.gm-value { font-weight: 500; }
+.gm-flags { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.gm-flag { background: #7a2e1f; color: #fff; font-weight: 700; font-size: 12px; padding: 3px 8px; border-radius: 20px; }
+.gm-flag.calm { background: #2f5d50; }
+.gm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.gm-actions .btn + .btn { margin-top: 0; }
+</style>
+</head>
+<body>
+
+<!-- Karakterlap -->
+<section class="panel">
+  <div class="hero">
+    <h1>🏹 Kira</h1>
+    <div class="act" id="actLabel"></div>
+  </div>
+  <div class="bars">
+    <div>
+      <div class="bar-label"><span>❤️ Életerő</span><b id="hp"></b></div>
+      <div class="bar"><div class="hp" id="hpFill"></div></div>
+    </div>
+    <div>
+      <div class="bar-label"><span>👁️ Gyanú</span><b id="suspicion"></b></div>
+      <div class="bar"><div class="sus" id="susFill"></div></div>
+    </div>
+  </div>
+  <div class="chips">
+    <span>✨ Hírnév <b id="renown"></b></span>
+    <span>🪙 Arany <b id="gold"></b></span>
+    <span>🥾 <b id="totalKm"></b> km</span>
+  </div>
+  <div class="progress">
+    <div class="bar"><div class="prog" id="progFill"></div></div>
+  </div>
+  <div class="banner" id="faintBanner"></div>
+</section>
+
+<!-- Kör -->
+<section class="panel">
+  <div class="row">
+    <label class="lbl" for="actionInput">Mit tesz Kira? (nem kötelező)</label>
+    <input type="text" id="actionInput" autocomplete="off">
+  </div>
+  <div class="row pills">
+    <label><input type="radio" name="approach" id="apOpen" value="támadás" checked><span>⚔️ Nyílt</span></label>
+    <label><input type="radio" name="approach" id="apCovert" value="óvatos"><span>🌿 Óvatos</span></label>
+  </div>
+
+  <div class="row">
+    <label class="photo-btn" for="photoInput" id="fileLabel">📸 Az óra fotója</label>
+    <input type="file" id="photoInput" accept="image/*" onchange="previewImage()">
+  </div>
+  <div class="row nums">
+    <div><label class="lbl" for="inKm">km</label><input type="text" id="inKm" inputmode="decimal" autocomplete="off"></div>
+    <div><label class="lbl" for="inMin">perc</label><input type="text" id="inMin" inputmode="decimal" autocomplete="off"></div>
+    <div><label class="lbl" for="inSec">mp</label><input type="text" id="inSec" inputmode="numeric" autocomplete="off"></div>
+    <div><label class="lbl" for="inSteps">lépés</label><input type="text" id="inSteps" inputmode="numeric" autocomplete="off"></div>
+    <div><label class="lbl" for="inKcal">kcal</label><input type="text" id="inKcal" inputmode="numeric" autocomplete="off"></div>
+  </div>
+  <div class="row pills">
+    <label><input type="radio" name="workoutMode" id="wmCont" value="cont"><span>▶️ Edzés folytatva</span></label>
+    <label><input type="radio" name="workoutMode" id="wmNew" value="new"><span>🔄 Új edzés</span></label>
+  </div>
+
+  <button class="btn" id="sendBtn" onclick="sendTurn()">🎲 Dobás</button>
+  <button class="btn ghost small card-open" id="cardOpenBtn" onclick="openDlg('cardDlg')">🧾 Mesélő-kártya megnyitása</button>
+  <div class="error-box" id="errorBox"></div>
+</section>
+
+<div class="footer">
+  <button class="link-btn" onclick="openDlg('logDlg')">📜 Napló</button>
+  <button class="link-btn" onclick="openDlg('rulesDlg')">📖 Szabályok</button>
+  <button class="link-btn" onclick="openDlg('setupDlg')">🧙 Mesélő beállítása</button>
+  <button class="link-btn" onclick="resetGame()">↺ Új játék</button>
+</div>
+
+<!-- Mesélő-kártya -->
+<dialog id="cardDlg">
+  <div class="sheet">
+    <div class="sheet-head"><h2>🧾 Mesélő-kártya</h2><button class="x" onclick="closeDlg('cardDlg')" aria-label="Bezárás">×</button></div>
+    <div class="sheet-body">
+      <div class="gm-card" id="gmCard"></div>
+      <a class="btn small" style="margin-top:10px;" href="https://gemini.google.com/app" target="_blank" rel="noopener">✨ Gemini megnyitása</a>
+      <p class="note">Készítsen képernyőfotót a kártyáról, és küldje el a mesélő Gemnek.</p>
+    </div>
+  </div>
+</dialog>
+
+<!-- Napló -->
+<dialog id="logDlg">
+  <div class="sheet">
+    <div class="sheet-head"><h2>📜 Napló</h2><button class="x" onclick="closeDlg('logDlg')" aria-label="Bezárás">×</button></div>
+    <div class="sheet-body" id="storyLog"></div>
+  </div>
+</dialog>
+
+<!-- Szabályok -->
+<dialog id="rulesDlg">
+  <div class="sheet">
+    <div class="sheet-head"><h2>📖 Szabályok</h2><button class="x" onclick="closeDlg('rulesDlg')" aria-label="Bezárás">×</button></div>
+    <div class="sheet-body">
+      <ul>
+        <li><b>Egy kör:</b> válassza ki az óra fotóját, írja be róla a számokat (km, perc, mp, lépés, kcal), majd nyomja meg a Dobás gombot. A mesélő-kártyáról készült képernyőfotót küldje el a mesélő Gemnek. Fotó nélkül csak beszélgetés vagy felfedezés történik, harc nélkül.</li>
+        <li><b>Edzés folytatva / Új edzés:</b> ha az órát csak szüneteltette, a program az előző fotó óta megtett részt számolja; ha újraindította, a teljes értéket.</li>
+      </ul>
+      <ul>
+      <li><b>Tempó-bónusz:</b> 8:00 perc/km alatt (kocogás) +4 · 8:00–10:00 +2 · 10:00–12:00 +1 · 12:00 felett +0.</li>
+      <li><b>Kitartás-bónusz:</b> ha egy szakaszt gyors tempóban (12:00 perc/km alatt) sokáig bír: 15 perctől +1, 25 perctől +2, 40 perctől +3, 60 perctől +4 AÉ. Emellett minden 10 gyors perc +1 HP (legfeljebb +4), minden 20 gyors perc +1 hírnév. Lassú tempónál (pl. bolti nézelődés) nem jár. A 3:30 perc/km-nél gyorsabb, irreális tempó semmilyen bónuszt nem ad.</li>
+      <li><b>Lopakodás:</b> óvatos megközelítésnél lassú (12:00 feletti) tempóval +3.</li>
+      <li><b>Akció érték (AÉ):</b> d20 (a program dobja) + bónuszok. 9 vagy kevesebb: kudarc · 10–15: részleges siker · 16 vagy több: kritikus siker (+2 hírnév). A 20-as dobás mindig kritikus, az 1-es mindig kudarc.</li>
+      <li><b>Támadó / nyílt lépésnél:</b> kudarc 5 sebzés és +1 gyanú · részleges siker 2 sebzés.</li>
+      <li><b>Óvatos / rejtett lépésnél:</b> kudarc +3 gyanú · részleges siker +1 gyanú · kritikus siker −1 gyanú. Itt nincs sebzés.</li>
+      <li><b>Kalóriapajzs:</b> minden 25 kcal 1 sebzést kivéd (a gyanút nem).</li>
+      <li><b>Lelepleződés:</b> ha a gyanú eléri a 10-et, Kira lebukik – a kaland nem ér véget, de nagy bajba kerül.</li>
+      <li><b>Zsákmány:</b> 500 lépés alatt csak nyomok · 500–800 lépés: kis zsákmány · 800 felett: értékes lelet. Lassú (12:00 perc/km feletti) tempónál egy szinttel gyengébb.</li>
+      <li><b>Pihenő:</b> ha 25 percen belül újabb gyors szakaszt küld be, az egy sétának számít. Minden 3. szakasz után Kira megpihen: +3 HP és −2 gyanú.</li>
+      <li><b>Ájulás:</b> ha a HP elfogy, Kira elájul, és elveszíti aranya felét. Egy legalább 5 km-es egybefüggő séta kell, hogy magához térjen 10 HP-val.</li>
+      <li><b>Lelepleződés után</b> szintén egy legalább 5 km-es egybefüggő séta kell a szabaduláshoz. Ezek a kilométerek nem számítanak bele a történetbe.</li>
+      <li><b>A történet hossza</b> kb. 100 km: ennyi séta alatt ér véget a küldetés.</li>
+      <li><b>Óra:</b> „Folytatás” esetén a program az előző fotóhoz képesti különbséget számolja (szüneteltetett edzésnél így pontosan a gyors szakasz számít). „Új edzés” esetén a fotón látható teljes értéket. Ha „Folytatás” van kiválasztva, de a számok kisebbek az előzőnél, a program új edzésnek veszi.</li>
+    </ul>
+  
+    </div>
+  </div>
+</dialog>
+
+<!-- Mesélő beállítása -->
+<dialog id="setupDlg">
+  <div class="sheet">
+    <div class="sheet-head"><h2>🧙 Mesélő beállítása</h2><button class="x" onclick="closeDlg('setupDlg')" aria-label="Bezárás">×</button></div>
+    <div class="sheet-body">
+      <ol>
+        <li>Nyissa meg a <b>gemini.google.com</b> oldalt (gépen a legkényelmesebb), és válassza a <b>Gemek → Új Gem</b> lehetőséget.</li>
+        <li>Nevezze el például így: <b>Kira mesélője</b>.</li>
+        <li>Nyomja meg az alábbi gombot, és illessze be a szöveget a Gem <b>Utasítások</b> mezőjébe – elolvasás nélkül –, majd mentse el.</li>
+        <li>Minden körben ezt a Gemet nyissa meg, és ugyanabban a csevegésben folytassa.</li>
+      </ol>
+      <button class="btn" style="margin-top:12px;" onclick="copyGem()">📋 Mesélő-utasítás másolása</button>
+      <div class="copied" id="gemCopied"></div>
+      <div class="warn">⚠️ A szöveg a történet titkos vázát tartalmazza – ne olvassa el, ha nem akarja elrontani a meglepetést.</div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+// ==========================================
+// Beállítások
+// ==========================================
+const STATE_KEY = "seta_rpg_state_v5";
+const CARD_PHOTO_KEY = "seta_rpg_card_photo";
+const MAX_LOG_CHAPTERS = 300;
+const MAX_USED_PHOTOS = 1000;
+const FIRST_PHOTO_GRACE_HOURS = 24;
+
+const RULES = {
+  maxHp: 20,
+  minIntervalSec: 240,     // legalább 4 perces gyors szakasz indít eseményt
+  kcalPerShield: 25,
+  dmgFail: 5,
+  dmgPartial: 2,
+  renownCrit: 2,
+  stepsSmallLoot: 500,
+  stepsBigLoot: 800,
+  stepsPerKm: 1400,
+  sessionGapMin: 25,       // ennyi percen belüli szakaszok egy sétának számítanak
+  restEvery: 3,
+  restHeal: 3,
+  reviveHp: 10,
+  recoveryKm: 5,           // ájulás vagy lebukás után ennyi km kell egyben
+  workoutMaxGapH: 3,       // ennyi óra szünet után alapból „Új edzés” van kiválasztva
+  stealthBonus: 3,
+  fastPaceMax: 12,         // ennél gyorsabb (perc/km) tempó számít „gyors” gyaloglásnak
+  minRealPace: 3.5,        // ennél gyorsabb tempó irreális (pl. jármű) – nincs bónusz
+  enduranceTiers: [[15, 1], [25, 2], [40, 3], [60, 4]],  // [gyors percek, AÉ-bónusz]
+  enduranceHealPer10: 1,   // minden 10 gyors perc +1 HP (15 perctől)
+  enduranceHealMax: 4,
+  enduranceRenownPer20: 1, // minden 20 gyors perc +1 hírnév
+  maxSuspicion: 10,
+  susFailCovert: 3,
+  susPartialCovert: 1,
+  susCritCovert: -1,
+  susFailOpen: 1,
+  restSuspicion: 2,
+  suspicionAfterExposure: 6
+};
+const GOLD_LIMIT = { "semmi": 0, "nyomok": 0, "kis": 3, "értékes": 10 };
+
+// A történet hossza kilométerben, és hogy melyik felvonás hány km-nél érjen véget
+const STORY_KM = 100;
+const ACTS = [
+  { name: "I. felvonás", minKm: 18, maxKm: 24 },
+  { name: "II. felvonás", minKm: 50, maxKm: 58 },
+  { name: "III. felvonás", minKm: 80, maxKm: 90 },
+  { name: "IV. felvonás", minKm: 96, maxKm: 106 }
+];
+
+const INTRO_TEXT = "Kira a Szürkekő-vár alatti Nyírhalom faluban húzódik meg, egy vámszedő pajtájában. Megbízása egyszerűnek tűnik: egy közvetítő céh fizeti azért, hogy titokban felmérje a királyi vár védelmét, és feltárja a gyengeségeit. Hogy ki áll a megbízás mögött, azt nem tudja, és nem is kérdezte.\n\nA falakon át nem juthat be. Holnap viszont a király emberei ismét összegyűjtik a környék parasztlányait, hogy felvigyék őket a várba, a királyi hárem szolgálatára. A kiválasztottak között van egy molnárlány is, Anka, aki szemmel láthatóan retteg. A lányok anyái suttognak valamit a tavaly elvittekről, de elhallgatnak, amint idegen közeledik.\n\nKira nyakában ott függ anyja ajándéka, a láthatatlan nyaklánc, amely emberinek mutatja sötételf vonásait. Más nem lesz nála.";
+
+function defaultState() {
+  return {
+    hp: RULES.maxHp,
+    maxHp: RULES.maxHp,
+    gold: 10,
+    renown: 0,
+    suspicion: 0,
+    totalKm: 0,
+    storyKm: 0,
+    avgKm: 0,
+    act: 0,
+    round: 0,
+    recovery: null,
+    lastReading: null,
+    campaignComplete: false,
+    session: { lastTime: null, count: 0 },
+    usedPhotos: [],
+    lastPhotoTime: null,
+    lastCard: null,
+    log: [{ title: "Prológus", text: INTRO_TEXT, action: "", mech: "", date: new Date().toISOString() }]
+  };
+}
+
+let state = defaultState();
+
+// ==========================================
+// Tárolás
+// ==========================================
+function storageGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+function storageSet(key, value) { try { localStorage.setItem(key, value); } catch (e) {} }
+function storageRemove(key) { try { localStorage.removeItem(key); } catch (e) {} }
+
+function loadState() {
+  const saved = storageGet(STATE_KEY);
+  if (!saved) return;
+  try {
+    state = Object.assign(defaultState(), JSON.parse(saved));
+    if (!Array.isArray(state.log) || state.log.length === 0) state.log = defaultState().log;
+  } catch (e) {
+    console.log("A mentett állás nem olvasható, új játék indul.");
+  }
+}
+function saveState() { storageSet(STATE_KEY, JSON.stringify(state)); }
+
+// ==========================================
+// Segédfüggvények
+// ==========================================
+function formatDate(iso) {
+  try {
+    return new Date(iso).toLocaleString("hu-HU", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch (e) { return ""; }
+}
+function formatDateTime(ms) {
+  try {
+    return new Date(ms).toLocaleString("hu-HU", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+  } catch (e) { return ""; }
+}
+function formatDuration(sec) {
+  sec = Math.round(sec);
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(s).padStart(2, "0");
+}
+function formatPace(minPerKm) {
+  let m = Math.floor(minPerKm), s = Math.round((minPerKm - m) * 60);
+  if (s === 60) { m += 1; s = 0; }
+  return m + ":" + String(s).padStart(2, "0");
+}
+function toNumber(v, fallback) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// ==========================================
+// Felület
+// ==========================================
+function renderLog() {
+  const box = document.getElementById("storyLog");
+  box.innerHTML = "";
+  state.log.forEach(ch => {
+    const wrap = document.createElement("div");
+    wrap.className = "chapter";
+
+    const head = document.createElement("div");
+    head.className = "chapter-head";
+    head.textContent = (ch.title || "") + (ch.date ? " · " + formatDate(ch.date) : "");
+    wrap.appendChild(head);
+
+    if (ch.action) {
+      const act = document.createElement("div");
+      act.className = "chapter-action";
+      act.textContent = "» " + ch.action;
+      wrap.appendChild(act);
+    }
+    if (ch.mech) {
+      const mech = document.createElement("div");
+      mech.className = "chapter-mech";
+      mech.textContent = ch.mech;
+      wrap.appendChild(mech);
+    }
+    const txt = document.createElement("div");
+    txt.className = "chapter-text";
+    txt.textContent = ch.text;
+    wrap.appendChild(txt);
+
+    box.appendChild(wrap);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+function updateUI() {
+  document.getElementById("hp").textContent = state.hp + " / " + state.maxHp;
+  document.getElementById("hpFill").style.width = clamp(state.hp / state.maxHp * 100, 0, 100) + "%";
+  document.getElementById("renown").textContent = state.renown;
+  document.getElementById("suspicion").textContent = state.suspicion + " / " + RULES.maxSuspicion;
+  document.getElementById("susFill").style.width = clamp(state.suspicion / RULES.maxSuspicion * 100, 0, 100) + "%";
+  document.getElementById("actLabel").textContent = ACTS[Math.min(state.act, ACTS.length - 1)].name + " · " + state.storyKm.toFixed(1).replace(".", ",") + " / " + STORY_KM + " km";
+  document.getElementById("progFill").style.width = clamp(state.storyKm / STORY_KM * 100, 0, 100) + "%";
+  document.getElementById("gold").textContent = state.gold;
+  document.getElementById("totalKm").textContent = state.totalKm.toFixed(1).replace(".", ",");
+
+  const banner = document.getElementById("faintBanner");
+  banner.className = "banner";
+  if (state.campaignComplete) {
+    banner.style.display = "block";
+    banner.className = "banner good";
+    banner.textContent = "🏁 A küldetés véget ért. Új kalandot a lap alján indíthat.";
+  } else if (state.recovery) {
+    const r = state.recovery;
+    const what = r.faint && r.exposed ? "Kira eszméletlen és fogságban van" : r.faint ? "Kira eszméletlen" : "Kira lelepleződött és bajban van";
+    banner.style.display = "block";
+    banner.textContent = (r.faint ? "💀 " : "🚨 ") + what + ". A folytatáshoz töltsön fel egy fotót egy legalább " + RULES.recoveryKm + " km-es egybefüggő sétáról. Ez a táv nem számít bele a történet kilométereibe.";
+  } else {
+    banner.style.display = "none";
+  }
+  renderLog();
+  renderCard();
+  saveState();
+}
+
+function showError(msg) {
+  const box = document.getElementById("errorBox");
+  box.textContent = msg;
+  box.style.display = msg ? "block" : "none";
+}
+
+function resetGame() {
+  if (!confirm("Biztosan új játékot indít? A jelenlegi krónika és Kira állapota törlődik. (A Gemini appban is kezdjen új csevegést a mesélő Gemmel.)")) return;
+  storageRemove(STATE_KEY);
+  storageRemove(CARD_PHOTO_KEY);
+  state = defaultState();
+  clearInputs();
+  showError("");
+  updateUI();
+  setDefaultWorkoutMode();
+}
+
+// ==========================================
+// Fotó ellenőrzése (csalás elleni védelem)
+// ==========================================
+let pendingPhoto = null;
+const PHOTO_LABEL_DEFAULT = "📸 Az óra fotója";
+
+function readExifDate(buf) {
+  const view = new DataView(buf);
+  if (view.byteLength < 4 || view.getUint16(0) !== 0xFFD8) return null;
+  let offset = 2;
+  while (offset + 4 < view.byteLength) {
+    const marker = view.getUint16(offset);
+    const size = view.getUint16(offset + 2);
+    if (marker === 0xFFE1 && view.getUint32(offset + 4) === 0x45786966) {
+      return parseTiffDate(view, offset + 10);
+    }
+    if ((marker & 0xFF00) !== 0xFF00 || marker === 0xFFDA) break;
+    offset += 2 + size;
+  }
+  return null;
+}
+
+function parseTiffDate(view, tiff) {
+  const little = view.getUint16(tiff) === 0x4949;
+  const u16 = o => view.getUint16(o, little);
+  const u32 = o => view.getUint32(o, little);
+
+  function readIfd(ifdOffset) {
+    const tags = {};
+    const start = tiff + ifdOffset;
+    if (start + 2 > view.byteLength) return tags;
+    const count = u16(start);
+    for (let i = 0; i < count; i++) {
+      const e = start + 2 + i * 12;
+      if (e + 12 > view.byteLength) break;
+      const tag = u16(e), type = u16(e + 2), num = u32(e + 4);
+      if (type === 2) {
+        const valOff = num > 4 ? tiff + u32(e + 8) : e + 8;
+        let s = "";
+        for (let k = 0; k < num - 1 && valOff + k < view.byteLength; k++) s += String.fromCharCode(view.getUint8(valOff + k));
+        tags[tag] = s;
+      } else if (type === 4) {
+        tags[tag] = u32(e + 8);
+      }
+    }
+    return tags;
+  }
+
+  const ifd0 = readIfd(u32(tiff + 4));
+  let dateStr = null;
+  if (ifd0[0x8769]) {
+    const exif = readIfd(ifd0[0x8769]);
+    dateStr = exif[0x9003] || exif[0x9004] || null;
+  }
+  dateStr = dateStr || ifd0[0x0132] || null;
+  if (!dateStr) return null;
+  const m = dateStr.match(/^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
+  if (!m) return null;
+  const t = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]).getTime();
+  return Number.isFinite(t) && +m[1] > 2000 ? t : null;
+}
+
+function dateFromFilename(name) {
+  const m = String(name).match(/(20\d{2})[-_.]?(\d{2})[-_.]?(\d{2})[-_ T.]?(\d{2})[-_.:]?(\d{2})[-_.:]?(\d{2})/);
+  if (!m) return null;
+  const [y, mo, d, h, mi, s] = m.slice(1).map(Number);
+  if (mo < 1 || mo > 12 || d < 1 || d > 31 || h > 23 || mi > 59 || s > 59) return null;
+  return new Date(y, mo - 1, d, h, mi, s).getTime();
+}
+
+async function hashBuffer(buf) {
+  try {
+    if (window.crypto && crypto.subtle) {
+      const digest = await crypto.subtle.digest("SHA-256", buf);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+  } catch (e) {}
+  const bytes = new Uint8Array(buf);
+  let h = 0x811c9dc5;
+  for (let i = 0; i < bytes.length; i++) { h ^= bytes[i]; h = Math.imul(h, 0x01000193); }
+  return "f" + (h >>> 0).toString(16) + "-" + bytes.length;
+}
+
+async function analyzePhoto(file) {
+  const buf = await file.arrayBuffer();
+  let time = null;
+  try { time = readExifDate(buf); } catch (e) {}
+  if (!time) time = dateFromFilename(file.name);
+  if (!time && file.lastModified) time = file.lastModified;
+  return { file: file, time: time, hash: await hashBuffer(buf) };
+}
+
+function checkPhoto(info) {
+  if ((state.usedPhotos || []).some(p => p.h === info.hash)) {
+    return "Ezt a fotót már felhasználta egy korábbi szakasznál. Kérem, egy új gyors szakaszról készült fotót töltsön fel.";
+  }
+  if (!info.time) return null;
+  if (state.lastPhotoTime) {
+    if (info.time <= state.lastPhotoTime) {
+      return "Ez a fotó " + formatDateTime(info.time) + " időpontban készült, ami nem újabb, mint a legutóbb felhasznált fotó (" + formatDateTime(state.lastPhotoTime) + "). Kérem, egy újabb szakaszról készült fotót töltsön fel.";
+    }
+  } else {
+    const start = new Date(state.log[0] && state.log[0].date).getTime();
+    if (Number.isFinite(start) && info.time < start - FIRST_PHOTO_GRACE_HOURS * 3600 * 1000) {
+      return "Ez a fotó " + formatDateTime(info.time) + " időpontban készült, jóval a játék kezdete előtt. Kérem, a játék indulása utáni sétáról töltsön fel fotót.";
+    }
+  }
+  return null;
+}
+
+function setPhotoLabel(text) {
+  document.getElementById("fileLabel").textContent = text || PHOTO_LABEL_DEFAULT;
+}
+
+function clearPhoto() {
+  document.getElementById("photoInput").value = "";
+  pendingPhoto = null;
+  setPhotoLabel();
+}
+
+async function previewImage() {
+  showError("");
+  const file = document.getElementById("photoInput").files[0];
+  if (!file) { clearPhoto(); return; }
+  setPhotoLabel("⏳ Fotó ellenőrzése...");
+  try {
+    const info = await analyzePhoto(file);
+    const err = checkPhoto(info);
+    if (err) { clearPhoto(); showError(err); return; }
+    pendingPhoto = info;
+    setPhotoLabel("✓ Fotó rendben" + (info.time ? " · készült: " + formatDateTime(info.time) : ""));
+  } catch (e) {
+    clearPhoto();
+    showError("A fotót nem sikerült beolvasni. Kérem, próbálja újra.");
+  }
+}
+
+function imageToJpegBase64(file, maxSide) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/jpeg", 0.85).split(",")[1]);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("kép")); };
+    img.src = url;
+  });
+}
+
+async function makeThumbnail(file) {
+  try { return "data:image/jpeg;base64," + await imageToJpegBase64(file, 900); }
+  catch (e) { return null; }
+}
+
+// ==========================================
+// Az óra adatainak beolvasása a mezőkből
+// ==========================================
+function parseNum(id, label, integer) {
+  const raw = document.getElementById(id).value.trim().replace(/\s/g, "").replace(",", ".");
+  if (!raw) return { value: 0 };
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) return { error: "A(z) „" + label + "” mező értéke nem érvényes szám." };
+  return { value: integer ? Math.round(n) : n };
+}
+
+// Idő két mezőből: perc és másodperc (a perc lehet tizedes is, pl. 7,5)
+function parseTime() {
+  const mn = parseNum("inMin", "perc", false);
+  if (mn.error) return mn;
+  const sc = parseNum("inSec", "mp", true);
+  if (sc.error) return sc;
+  if (sc.value > 59) return { error: "A másodperc 0 és 59 között lehet." };
+  return { value: Math.round(mn.value * 60 + sc.value) };
+}
+
+function readNumbers() {
+  const km = parseNum("inKm", "Táv", false);
+  const t = parseTime();
+  const st = parseNum("inSteps", "Lépés", true);
+  const kc = parseNum("inKcal", "Kalória", true);
+  const err = [km, t, st, kc].find(x => x.error);
+  if (err) return { error: err.error };
+  const r = { distanceKm: km.value, durationSec: t.value, steps: st.value, kcal: kc.value };
+  r.any = !!(r.distanceKm || r.durationSec || r.steps || r.kcal);
+  if (r.distanceKm > 60) return { error: "A táv (" + r.distanceKm + " km) túl nagy. Kérem, ellenőrizze – km-ben adja meg, pl. 0,9." };
+  if (r.durationSec > 6 * 3600) return { error: "Az idő (" + formatDuration(r.durationSec) + ") túl hosszú. Kérem, ellenőrizze a perc és mp mezőt (pl. 7 perc 30 mp)." };
+  if (r.distanceKm > 0.05 && r.durationSec > 0) {
+    const pace = r.durationSec / 60 / r.distanceKm;
+    if (pace > 40) return { error: "Az idő és a táv alapján a tempó " + formatPace(pace) + " perc/km lenne, ami nem lehet valódi. Kérem, ellenőrizze az időt (perc és mp) és a távot (km, pl. 0,9)." };
+  }
+  if (r.steps > 100000) return { error: "A lépésszám túl nagy. Kérem, ellenőrizze." };
+  if (r.kcal > 5000) return { error: "A kalória túl nagy. Kérem, ellenőrizze." };
+  return r;
+}
+
+function clearInputs() {
+  ["actionInput", "inKm", "inMin", "inSec", "inSteps", "inKcal"].forEach(id => { document.getElementById(id).value = ""; });
+  document.getElementById("apOpen").checked = true;
+  clearPhoto();
+}
+
+// ==========================================
+// Szabályok – ezt a program számolja
+// ==========================================
+function paceInfo(paceMin) {
+  if (!paceMin) return { bonus: 0, label: "ismeretlen", slow: false };
+  if (paceMin < RULES.minRealPace) return { bonus: 0, label: "irreálisan gyors – nincs bónusz", slow: false, unreal: true };
+  if (paceMin < 8) return { bonus: 4, label: "kocogás", slow: false };
+  if (paceMin < 10) return { bonus: 2, label: "gyors séta", slow: false };
+  if (paceMin <= 12) return { bonus: 1, label: "tempós séta", slow: false };
+  return { bonus: 0, label: "lassú séta", slow: true };
+}
+
+function snapshotReading(r, t) {
+  return { distanceKm: r.distanceKm, durationSec: r.durationSec, steps: r.steps, kcal: r.kcal, time: t };
+}
+
+// Az óra folyamatosan növő számlálójából kiszámolja, mennyi ez a szakasz.
+// Ha a számok kisebbek, mint az előző fotón (vagy a játékos jelezte), új edzésnek veszi.
+function workoutDelta(reading, t, forceNew, ref) {
+  const prev = ref || state.lastReading;
+  let cumulative = false;
+  let autoNew = false;
+  if (!forceNew && prev) {
+    const cmp = (a, b) => (a > 0 && b > 0) ? (a > b + 0.001 ? 1 : (a >= b - 0.01 ? 0 : -1)) : null;
+    const c = [cmp(reading.durationSec, prev.durationSec), cmp(reading.distanceKm, prev.distanceKm), cmp(reading.steps, prev.steps)];
+    cumulative = !c.includes(-1) && c.includes(1);
+    autoNew = !cumulative;   // folytatást választott, de a számok nem nőttek: új edzésnek vesszük
+  }
+  const d = cumulative ? {
+    distanceKm: Math.max(0, reading.distanceKm - prev.distanceKm),
+    durationSec: Math.max(0, reading.durationSec - prev.durationSec),
+    steps: Math.max(0, reading.steps - prev.steps),
+    kcal: Math.max(0, reading.kcal - prev.kcal)
+  } : Object.assign({}, reading);
+  d.cumulative = cumulative;
+  d.autoNew = autoNew;
+  return d;
+}
+
+// Alapértelmezett választás: az első fotónál és hosszabb szünet után új edzés, különben folytatás
+function setDefaultWorkoutMode() {
+  const ref = (state.recovery && state.recovery.base) || state.lastReading;
+  const fresh = !ref || !ref.time || Date.now() - ref.time > RULES.workoutMaxGapH * 3600000;
+  document.getElementById(fresh ? "wmNew" : "wmCont").checked = true;
+}
+
+function kmOf(d) {
+  return d.distanceKm || (d.steps ? d.steps / RULES.stepsPerKm : 0);
+}
+
+function resolveTurn(reading, approach, photoTime, forceNew) {
+  const m = { hasPhoto: !!reading, encounter: false };
+  const t = photoTime || Date.now();
+  m.hpBefore = state.hp;
+  if (!reading) { m.hpAfter = state.hp; return m; }
+
+  // Felépülés ájulásból vagy lebukásból: egyetlen, legalább 5 km-es séta kell
+  if (state.recovery) {
+    const d = workoutDelta(reading, t, forceNew, state.recovery.base);
+    const km = kmOf(d);
+    m.recoveryKm = km;
+    m.cumulative = d.cumulative;
+    if (km < RULES.recoveryKm) { m.recoveryShort = true; return m; }
+    state.totalKm += km;
+    state.lastReading = snapshotReading(reading, t);
+    m.recovered = { faint: !!state.recovery.faint, exposed: !!state.recovery.exposed };
+    if (m.recovered.faint) state.hp = RULES.reviveHp;
+    if (m.recovered.exposed) state.suspicion = RULES.suspicionAfterExposure;
+    state.recovery = null;
+    state.session = { lastTime: null, count: 0 };
+    m.hpAfter = state.hp;
+    return m;
+  }
+
+  const d = workoutDelta(reading, t, forceNew);
+  state.lastReading = snapshotReading(reading, t);
+  const km = kmOf(d);
+  m.cumulative = d.cumulative;
+  m.autoNew = d.autoNew;
+  m.km = km;
+  m.durationSec = d.durationSec;
+  m.steps = d.steps;
+  m.kcal = d.kcal;
+  m.pace = km > 0.05 && d.durationSec ? d.durationSec / 60 / km : 0;
+  m.unreal = !!(m.pace && m.pace < RULES.minRealPace);
+  if (!m.unreal) {           // irreális tempónál (pl. jármű) a táv nem számít
+    state.totalKm += km;
+    state.storyKm += km;
+  }
+
+  const valid = d.durationSec >= RULES.minIntervalSec || (d.durationSec === 0 && d.steps >= RULES.stepsSmallLoot);
+  m.valid = valid;
+  if (!valid) { m.hpAfter = state.hp; return m; }
+
+  // Egy sétán belüli szakaszok számlálása (pihenőhöz)
+  const s = state.session || { lastTime: null, count: 0 };
+  s.count = (s.lastTime && t - s.lastTime <= RULES.sessionGapMin * 60000) ? s.count + 1 : 1;
+  s.lastTime = t;
+  state.session = s;
+  m.sessionCount = s.count;
+  state.avgKm = state.avgKm ? state.avgKm * 0.8 + km * 0.2 : km;
+
+  m.encounter = true;
+  const p = paceInfo(m.pace);
+  m.paceLabel = p.label;
+  m.paceBonus = p.bonus;
+  m.approach = approach;
+  m.stealthBonus = (approach === "óvatos" && p.slow) ? RULES.stealthBonus : 0;
+
+  // Kitartás: csak a gyors tempóban megtett idő számít
+  m.fastMin = (m.pace && !p.unreal && m.pace <= RULES.fastPaceMax) ? d.durationSec / 60 : 0;
+  m.enduranceBonus = 0;
+  RULES.enduranceTiers.forEach(([min, bonus]) => { if (m.fastMin >= min) m.enduranceBonus = bonus; });
+  m.enduranceHeal = m.enduranceBonus ? Math.min(RULES.enduranceHealMax, Math.floor(m.fastMin / 10) * RULES.enduranceHealPer10) : 0;
+  m.enduranceRenown = m.enduranceBonus ? Math.floor(m.fastMin / 20) * RULES.enduranceRenownPer20 : 0;
+
+  m.roll = Math.floor(Math.random() * 20) + 1;
+  m.ae = m.roll + m.paceBonus + m.stealthBonus + m.enduranceBonus;
+
+  if (m.roll === 20 || (m.roll !== 1 && m.ae >= 16)) m.result = "kritikus";
+  else if (m.roll === 1 || m.ae <= 9) m.result = "kudarc";
+  else m.result = "részleges";
+
+  m.shield = Math.floor(d.kcal / RULES.kcalPerShield);
+  m.covert = approach === "óvatos";
+  if (m.covert) {
+    m.baseDmg = 0;
+    m.susChange = m.result === "kudarc" ? RULES.susFailCovert : m.result === "részleges" ? RULES.susPartialCovert : RULES.susCritCovert;
+  } else {
+    m.baseDmg = m.result === "kudarc" ? RULES.dmgFail : m.result === "részleges" ? RULES.dmgPartial : 0;
+    m.susChange = m.result === "kudarc" ? RULES.susFailOpen : 0;
+  }
+  m.dmg = Math.max(0, m.baseDmg - m.shield);
+  m.renownGain = m.result === "kritikus" ? RULES.renownCrit : 0;
+
+  const tiers = ["nyomok", "kis", "értékes"];
+  let tier = d.steps > RULES.stepsBigLoot ? 2 : d.steps >= RULES.stepsSmallLoot ? 1 : 0;
+  if (!m.pace || p.slow || p.unreal) tier = Math.max(0, tier - 1);   // lassú tempónál egy szinttel gyengébb
+  m.lootTier = tiers[tier];
+
+  m.restHeal = (m.sessionCount % RULES.restEvery === 0) ? RULES.restHeal : 0;
+  m.restSus = m.restHeal ? -RULES.restSuspicion : 0;
+
+  state.hp = clamp(state.hp - m.dmg + m.restHeal + m.enduranceHeal, 0, state.maxHp);
+  state.renown += m.renownGain + m.enduranceRenown;
+  state.suspicion = clamp(state.suspicion + m.susChange + m.restSus, 0, RULES.maxSuspicion);
+
+  if (state.hp <= 0) {
+    m.fainted = true;
+    m.goldLost = Math.floor(state.gold / 2);
+    state.gold -= m.goldLost;
+  }
+  if (state.suspicion >= RULES.maxSuspicion) m.exposed = true;
+  if (m.fainted || m.exposed) {
+    state.recovery = { faint: !!m.fainted, exposed: !!m.exposed, base: state.lastReading };
+  }
+  m.hpAfter = state.hp;
+  return m;
+}
+
+function mechText(m) {
+  if (!m.hasPhoto) return "💬 Fotó nélkül: beszélgetés, felfedezés – harc és zsákmány nélkül.";
+  if (m.recovered) {
+    const what = m.recovered.faint && m.recovered.exposed ? "Kira magához tért és kiszabadult"
+      : m.recovered.faint ? "Kira magához tért (" + RULES.reviveHp + " HP)" : "Kira kiszabadult";
+    return "🥾 " + m.recoveryKm.toFixed(2) + " km egyben – " + what + ".\n(Ez a táv nem számít bele a történet kilométereibe.)";
+  }
+  const lines = [];
+  let l1 = "🥾 " + m.km.toFixed(2) + " km";
+  if (m.durationSec) l1 += " · " + formatDuration(m.durationSec);
+  if (m.steps) l1 += " · " + m.steps + " lépés";
+  if (m.kcal) l1 += " · " + m.kcal + " kcal";
+  if (m.cumulative) l1 += "\n⌚ Folytatás: az előző fotó óta megtett rész";
+  if (m.autoNew) l1 += "\n⌚ A számok kisebbek voltak az előző fotónál, ezért új edzésnek számoltam";
+  if (m.pace) l1 += "\n⏱️ Tempó: " + formatPace(m.pace) + " perc/km (" + paceInfo(m.pace).label + ")";
+  if (m.unreal) l1 += "\n🚗 Irreális tempó – ez a táv nem számít bele a történetbe";
+  lines.push(l1);
+
+  if (!m.valid) {
+    lines.push("⚠️ 4 percnél rövidebb szakasz – nincs esemény, csak haladás.");
+  } else if (m.encounter) {
+    let ae = "🎲 d20: " + m.roll + " + tempó " + m.paceBonus;
+    if (m.stealthBonus) ae += " + lopakodás " + m.stealthBonus;
+    if (m.enduranceBonus) ae += " + kitartás " + m.enduranceBonus;
+    ae += " = AÉ " + m.ae + " → " + ({ kritikus: "KRITIKUS SIKER", részleges: "Részleges siker", kudarc: "KUDARC" })[m.result];
+    ae += m.covert ? " (óvatos)" : " (nyílt)";
+    lines.push(ae);
+    lines.push(m.baseDmg > 0
+      ? "🛡️ Kalóriapajzs: " + m.shield + " · Sebzés: " + m.baseDmg + " − " + m.shield + " = " + m.dmg + " HP"
+      : "🛡️ Nincs sebzés");
+    if (m.susChange) lines.push("👁️ Gyanú: " + (m.susChange > 0 ? "+" : "") + m.susChange);
+    if (m.renownGain) lines.push("✨ +" + m.renownGain + " hírnév");
+    if (m.enduranceBonus) {
+      lines.push("💪 Kitartás: " + Math.round(m.fastMin) + " perc gyors tempóban → +" + m.enduranceBonus + " AÉ"
+        + (m.enduranceHeal ? ", +" + m.enduranceHeal + " HP" : "")
+        + (m.enduranceRenown ? ", +" + m.enduranceRenown + " hírnév" : ""));
+    }
+    lines.push("🎒 Zsákmány: " + ({ "értékes": "értékes lelet", "kis": "kis zsákmány", "nyomok": "csak nyomok" })[m.lootTier]);
+    if (m.restHeal) lines.push("🏕️ " + m.sessionCount + ". szakasz – rövid pihenő: +" + m.restHeal + " HP, −" + RULES.restSuspicion + " gyanú");
+    if (m.fainted) lines.push("💀 Kira elájult! Elvesztett " + m.goldLost + " aranyat.");
+    if (m.exposed) lines.push("🚨 A gyanú elérte a " + RULES.maxSuspicion + "-et – Kira LELEPLEZŐDÖTT!");
+    if (m.fainted || m.exposed) lines.push("➡️ A folytatáshoz egy legalább " + RULES.recoveryKm + " km-es egybefüggő séta kell.");
+  }
+  return lines.join("\n");
+}
+
+// ==========================================
+// Mesélő-kártya
+// ==========================================
+const RESULT_LABEL = { kritikus: "KRITIKUS SIKER", részleges: "RÉSZLEGES SIKER", kudarc: "KUDARC" };
+const LOOT_LABEL = { "értékes": "értékes lelet", "kis": "kis zsákmány", "nyomok": "csak nyomok, információ" };
+
+function fmtKm(x) { return x.toFixed(2).replace(".", ","); }
+
+function buildCard(m, ctx) {
+  const rows = [];
+  const flags = [];
+  if (ctx.first) flags.push({ t: "ELSŐ KÖR", calm: true });
+
+  rows.push(["Kira döntése", (ctx.action ? "„" + ctx.action + "”" : "(nincs megadva – folytatja, amit elkezdett)") + " · " + (ctx.approach === "óvatos" ? "ÓVATOS" : "NYÍLT")]);
+
+  if (ctx.reading) {
+    const r = ctx.reading;
+    const shown = [r.distanceKm ? fmtKm(r.distanceKm) + " km" : null, r.durationSec ? formatDuration(r.durationSec) : null,
+      r.steps ? r.steps + " lépés" : null, r.kcal ? r.kcal + " kcal" : null].filter(Boolean).join(" · ");
+    rows.push(["Óra kijelzője", shown + (ctx.forceNew ? " (új edzés)" : " (folytatott edzés)")]);
+    rows.push(["Fotó készült", ctx.photoTime ? formatDateTime(ctx.photoTime) : "ismeretlen (a fájlból nem olvasható ki)"]);
+  }
+
+  if (!m.hasPhoto) {
+    flags.push({ t: "NINCS FOTÓ" });
+  } else if (m.recovered) {
+    rows.push(["Egybefüggő séta", fmtKm(m.recoveryKm) + " km"]);
+    if (m.recovered.faint) flags.push({ t: "FELÉPÜLÉS ÁJULÁSBÓL", calm: true });
+    if (m.recovered.exposed) flags.push({ t: "SZABADULÁS A LELEPLEZŐDÉSBŐL", calm: true });
+  } else {
+    let seg = fmtKm(m.km) + " km";
+    if (m.durationSec) seg += " · " + formatDuration(m.durationSec);
+    if (m.steps) seg += " · " + m.steps + " lépés";
+    if (m.kcal) seg += " · " + m.kcal + " kcal";
+    rows.push(["Ez a szakasz", seg]);
+    if (m.pace) rows.push(["Tempó", formatPace(m.pace) + " perc/km – " + paceInfo(m.pace).label]);
+    if (m.unreal) flags.push({ t: "IRREÁLIS TEMPÓ" });
+    if (!m.valid) {
+      flags.push({ t: "TÚL RÖVID" });
+    } else if (m.encounter) {
+      let ae = "d20: " + m.roll + " + tempó " + m.paceBonus;
+      if (m.stealthBonus) ae += " + lopakodás " + m.stealthBonus;
+      if (m.enduranceBonus) ae += " + kitartás " + m.enduranceBonus;
+      ae += " = " + m.ae + " → " + RESULT_LABEL[m.result];
+      rows.push(["Dobás", ae]);
+      const cons = [];
+      if (m.baseDmg > 0) cons.push("sérülés " + m.dmg + " HP" + (m.shield ? " (kalóriapajzs kivédett " + Math.min(m.shield, m.baseDmg) + "-t)" : ""));
+      else cons.push("nincs sérülés");
+      if (m.susChange) cons.push("gyanú " + (m.susChange > 0 ? "+" : "") + m.susChange);
+      if (m.renownGain) cons.push("hírnév +" + m.renownGain);
+      if (m.enduranceHeal) cons.push("kitartás +" + m.enduranceHeal + " HP");
+      if (m.enduranceRenown) cons.push("kitartás hírnév +" + m.enduranceRenown);
+      if (m.restHeal) cons.push("pihenő +" + m.restHeal + " HP");
+      rows.push(["Következmény", cons.join(" · ")]);
+      rows.push(["Zsákmány", LOOT_LABEL[m.lootTier] + (ctx.goldGain ? " · +" + ctx.goldGain + " arany" : "")]);
+      if (m.enduranceBonus) flags.push({ t: "KITARTÁS " + Math.round(m.fastMin) + " PERC", calm: true });
+      if (m.restHeal) flags.push({ t: "PIHENŐ", calm: true });
+      if (m.fainted) flags.push({ t: "ÁJULÁS" });
+      if (m.exposed) flags.push({ t: "LELEPLEZŐDÉS" });
+    }
+  }
+
+  rows.push(["Kira állapota", "HP " + state.hp + "/" + state.maxHp + " · Gyanú " + state.suspicion + "/" + RULES.maxSuspicion + " · Hírnév " + state.renown + " · Arany " + state.gold]);
+  const act = ACTS[Math.min(state.act, ACTS.length - 1)];
+  rows.push(["Történet", state.storyKm.toFixed(1).replace(".", ",") + " / " + STORY_KM + " km · " + act.name + " (vége kb. " + act.minKm + "–" + act.maxKm + " km-nél)"]);
+  if (ctx.closing === "act") flags.push({ t: "FELVONÁS VÉGE" });
+  if (ctx.closing === "final") flags.push({ t: "VÉGSŐ BEFEJEZÉS" });
+
+  const head = "🎲 VÁNDOR KRÓNIKÁK – MESÉLŐ-KÁRTYA · " + ctx.round + ". kör · " + formatDateTime(Date.now());
+  const text = head + "\n" + rows.map(r => r[0] + ": " + r[1]).join("\n")
+    + (flags.length ? "\nJelzések: " + flags.map(f => f.t).join(" · ") : "");
+  return { head: head, rows: rows, flags: flags, text: text };
+}
+
+function renderCard() {
+  const openBtn = document.getElementById("cardOpenBtn");
+  const card = state.lastCard;
+  openBtn.style.display = card ? "block" : "none";
+  if (!card) return;
+  openBtn.textContent = "🧾 Mesélő-kártya megnyitása (" + card.head.match(/(\d+)\. kör/)[0] + ")";
+  const box = document.getElementById("gmCard");
+  box.innerHTML = "";
+  const head = document.createElement("div");
+  head.className = "gm-head";
+  head.textContent = card.head;
+  box.appendChild(head);
+  const photo = storageGet(CARD_PHOTO_KEY);
+  if (photo && card.hasPhoto) {
+    const img = document.createElement("img");
+    img.className = "gm-photo";
+    img.alt = "Az óra fotója";
+    img.src = photo;
+    box.appendChild(img);
+  }
+  card.rows.forEach(r => {
+    const row = document.createElement("div");
+    row.className = "gm-row";
+    const l = document.createElement("div"); l.className = "gm-label"; l.textContent = r[0];
+    const v = document.createElement("div"); v.className = "gm-value"; v.textContent = r[1];
+    row.appendChild(l); row.appendChild(v);
+    box.appendChild(row);
+  });
+  if (card.flags.length) {
+    const fl = document.createElement("div");
+    fl.className = "gm-flags";
+    card.flags.forEach(f => {
+      const c = document.createElement("span");
+      c.className = "gm-flag" + (f.calm ? " calm" : "");
+      c.textContent = f.t;
+      fl.appendChild(c);
+    });
+    box.appendChild(fl);
+  }
+}
+
+// ==========================================
+// Felugró ablakok
+// ==========================================
+function openDlg(id) {
+  const d = document.getElementById(id);
+  if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute("open", "");
+  if (id === "logDlg") { const b = document.getElementById("storyLog"); b.scrollTop = b.scrollHeight; }
+}
+function closeDlg(id) {
+  const d = document.getElementById(id);
+  if (d.close) d.close(); else d.removeAttribute("open");
+}
+// A mesélő-kártya szövege nem másolható – csak képernyőfotóval adható át
+["copy", "cut", "contextmenu", "selectstart", "dragstart"].forEach(ev => {
+  document.addEventListener(ev, e => {
+    if (e.target.closest && e.target.closest("#gmCard")) e.preventDefault();
+  });
+});
+
+// Bezárás a sötét háttérre koppintva
+document.addEventListener("click", e => {
+  if (e.target.tagName === "DIALOG") closeDlg(e.target.id);
+});
+
+// ==========================================
+// Vágólap
+// ==========================================
+async function copyText(text, noteId) {
+  let ok = false;
+  try {
+    if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); ok = true; }
+  } catch (e) {}
+  if (!ok) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+    } catch (e) {}
+  }
+  const note = document.getElementById(noteId);
+  note.textContent = ok ? "✓ Másolva – most illessze be a Gemini appba." : "A másolás nem sikerült ezen az eszközön.";
+  setTimeout(() => { note.textContent = ""; }, 4000);
+}
+
+function copyGem() { copyText(GEM_TEXT, "gemCopied"); }
+
+// ==========================================
+// Egy kör lebonyolítása
+// ==========================================
+async function sendTurn() {
+  showError("");
+  if (state.campaignComplete) {
+    showError("A küldetés véget ért. Új kalandot a lap alján, az „Új játék indítása” gombbal kezdhet.");
+    return;
+  }
+
+  const actionText = document.getElementById("actionInput").value.trim();
+  const approach = document.getElementById("apCovert").checked ? "óvatos" : "támadás";
+  const file = document.getElementById("photoInput").files[0];
+  const forceNew = document.getElementById("wmNew").checked;
+  const nums = readNumbers();
+  if (nums.error) { showError(nums.error); return; }
+
+  if (state.recovery && !file) {
+    showError("Kira most nem tud cselekedni. A folytatáshoz töltsön fel egy fotót egy legalább " + RULES.recoveryKm + " km-es egybefüggő sétáról, és írja be az adatait.");
+    return;
+  }
+  if (!file && nums.any) {
+    showError("Az óra adatai csak az óra fotójával együtt számítanak. Kérem, töltse fel a fotót is.");
+    return;
+  }
+  if (file && !nums.any) {
+    showError("Kérem, írja be az óra kijelzőjéről a számokat (legalább a távot vagy az időt).");
+    return;
+  }
+  if (file) {
+    if (!pendingPhoto || pendingPhoto.file !== file) {
+      try { pendingPhoto = await analyzePhoto(file); } catch (e) { pendingPhoto = null; }
+    }
+    const photoErr = pendingPhoto ? checkPhoto(pendingPhoto) : "A fotót nem sikerült beolvasni. Kérem, válassza ki újra.";
+    if (photoErr) { clearPhoto(); showError(photoErr); return; }
+  }
+
+  const reading = file ? nums : null;
+  const backup = JSON.stringify(state);
+  const m = resolveTurn(reading, approach, pendingPhoto && pendingPhoto.time, forceNew);
+  if (m.recoveryShort) {
+    state = JSON.parse(backup);
+    showError("Ez a séta " + m.recoveryKm.toFixed(2) + " km" + (m.cumulative ? " (az előző fotóhoz képest)" : "")
+      + ". Kirának legalább " + RULES.recoveryKm + " km kell egyben – még " + (RULES.recoveryKm - m.recoveryKm).toFixed(2) + " km hiányzik. A fotó nem használódott el.");
+    return;
+  }
+
+  // Arany – a program sorsolja a zsákmány szintjén belül
+  let goldGain = 0;
+  if (m.encounter && !m.fainted) {
+    if (m.lootTier === "kis") goldGain = Math.floor(Math.random() * 4);
+    if (m.lootTier === "értékes") goldGain = 2 + Math.floor(Math.random() * 9);
+    state.gold += goldGain;
+  }
+
+  // Felvonás lezárása a megtett km alapján
+  const act = ACTS[Math.min(state.act, ACTS.length - 1)];
+  const canClose = m.encounter && !m.fainted && !m.exposed;
+  let closing = null;
+  if (canClose && state.storyKm >= (act.minKm + act.maxKm) / 2) {
+    closing = state.act >= ACTS.length - 1 ? "final" : "act";
+  }
+
+  const first = state.round === 0;
+  state.round += 1;
+  const card = buildCard(m, { round: state.round, first: first, action: actionText, approach: approach, reading: reading, forceNew: forceNew, goldGain: goldGain, closing: closing, photoTime: pendingPhoto && pendingPhoto.time });
+  card.hasPhoto = !!file;
+  state.lastCard = card;
+
+  if (closing === "act") state.act += 1;
+  if (closing === "final") state.campaignComplete = true;
+
+  let mech = mechText(m);
+  if (goldGain) mech += "\n💰 +" + goldGain + " arany";
+  if (closing === "act") mech += "\n📖 " + act.name + " lezárul – kezdődik a(z) " + ACTS[state.act].name + ".";
+  if (closing === "final") mech += "\n🏁 A küldetés véget ér.";
+  state.log.push({ title: state.round + ". kör", text: "", action: actionText, mech: mech, date: new Date().toISOString() });
+  if (state.log.length > MAX_LOG_CHAPTERS) state.log = state.log.slice(-MAX_LOG_CHAPTERS);
+
+  if (file && pendingPhoto) {
+    state.usedPhotos.push({ h: pendingPhoto.hash, t: pendingPhoto.time || null });
+    if (state.usedPhotos.length > MAX_USED_PHOTOS) state.usedPhotos = state.usedPhotos.slice(-MAX_USED_PHOTOS);
+    if (pendingPhoto.time) state.lastPhotoTime = Math.max(state.lastPhotoTime || 0, pendingPhoto.time);
+  }
+
+  if (file) {
+    const thumb = await makeThumbnail(file);
+    if (thumb) storageSet(CARD_PHOTO_KEY, thumb); else storageRemove(CARD_PHOTO_KEY);
+  } else {
+    storageRemove(CARD_PHOTO_KEY);
+  }
+
+  clearInputs();
+  updateUI();
+  setDefaultWorkoutMode();
+  openDlg("cardDlg");
+}
+
+// ==========================================
+// A mesélő Gem utasítása (spoiler!)
+// ==========================================
+const GEM_TEXT = `Te vagy a mesélője egy sötét hangulatú, lélektani fantasy kalandnak. A hangsúly a feszültségen, a bizalmon és árulásokon, a félelmen és az erkölcsi dilemmákon van – nem a szörnyirtáson. A világ nyers és szürke erkölcsű: nincsenek tisztán jó megoldások.
+
+FŐHŐS
+Kira: félig ember, félig sötételf nő. Erdőtündék között nevelkedett, ahol mindig kívülálló volt; anyja a föld alatti sötételf birodalom egyik hercegnője, de ott Kira létezéséről sem tudnak. Vándorvadász, aki nevet és hírnevet akar szerezni, és méltó akar lenni harcos anyjához.
+Harcmodor: kiváló íjász; közelharcban apró pengékkel inakat és mozgatópontokat vág át, így szinte láthatatlan vágással roskasztja össze az ellenfelet. Nem varázsló, de ismeri és használni tudja a mágikus tárgyakat, kristályokat, rúnákat.
+A nyaklánc: anyja adta, hogy ha a sötételfek valaha el akarnák fogni, el tudjon rejtőzni. Emberinek mutatja Kirát, és maga is láthatatlan, amíg Kira ki nem mondja a varázsigéjét. Ha elveszne vagy leleplezné, Kira sötételf vonásai azonnal láthatóvá válnának – az emberek félnek és gyűlölik a sötételfeket. A nyaklánc háttérelem, ne legyen belőle főcselekmény.
+
+MEGBÍZÁS ÉS HELYZET
+Aldor király titokban, egy közvetítő céhen keresztül bérel fel időnként ismeretlen szakembereket, hogy teszteljék a Szürkekő-vár védelmét. Rajta kívül senki sem tud erről; a király nem ismeri Kirát, és azt sem tudja, mikor érkezik valaki. Kira dolga: bejutni, feltérképezni a vár védelmét (őrségváltások, falak, titkos járatok, kulcsok, gyenge pontok), és jelentést tenni a céhnek. Kira nem tudja, hogy a megbízó maga a király – ez később kiderülhet, és komoly súlyt adhat a döntéseinek.
+A környező falvakból minden évben felviszik a parasztlányokat a várba, a királyi hárem szolgálatára. Kira helyet cserél egy kiválasztott molnárlánnyal, Ankával, és így jut be. A bejutáskor a lányokat megfürdetik és átvizsgálják, ezért Kiránál semmilyen fegyver nincs: mindent a várban kell szereznie vagy rögtönöznie (hajtű, olló, gyümölcskés, zsinór, üvegszilánk, később kulcsok, altatószer, igazi fegyver).
+
+A TITOK (fokozatosan, bizonyítékokon és beszélgetéseken keresztül derüljön ki)
+A háremből évek óta eltűnnek lányok, akik soha többé nem adnak hírt magukról; a lányok között ez csak pletyka. Valójában Valerius herceg, a király egyetlen fia és örököse, a legfőbb nemesekkel együtt titkos okkult szertartásokat tart a vár alatti kriptákban, és a lányokat áldozatként használja fel. A szertartás egy tiltott, mélyvilági véralku-rítus: Kira sötételf öröksége révén képes lehet felismerni, és ez rémisztő kérdéseket vet fel arról, honnan szerezték a tudást.
+A DILEMMA: Aldor jó és igazságos király, aki semmit sem tud. Ha Kira nyilvánosságra hozza a titkot, a király megbukik, és a szertartásokban részt vevő nemesek között hatalmi harc tör ki. Ha megöli a herceget, a királynak nem marad örököse – ugyanez a hatalmi harc jön. Ha hallgat, minden így marad. Egyik út sem tiszta.
+
+SZEREPLŐK
+- Aldor király: bölcs, szigorú, a birodalom stabilitásának záloga; vakon szereti a fiát.
+- Valerius herceg: karizmatikus, hideg, udvarias és nagyon intelligens. Nem rajzfilmgonosz: meggyőződése, hogy amit tesz, az a királyság erejét szolgálja.
+- Morvain főkamarás: a legbefolyásosabb nemes a szertartásokon; mézesmázos, számító, veszélyes.
+- Elora: háremhölgy, parasztlány, aki a herceg kegyeibe férkőzött; retteg, ezért kémkedik a többiek után. Megmenthető vagy veszélyes ellenség lehet.
+- Maren: idős szolgáló és ápoló, évtizedek óta a várban; gyanakszik, de hallgat, mert félti az életét. Sokat tud.
+- Corvus kapitány: a királyi testőrség vezetője, fanatikusan hű a királyhoz, gyűlöli a nemesi intrikákat. Nehéz megnyerni, de erős szövetséges lehet.
+- Ilka: fiatal, kedves háremlány, aki Kirához ragaszkodik; érzelmi tét – ha eltűnik, az fájjon.
+Minden szereplőnek saját célja és félelme van; reagáljanak következetesen arra, amit Kira korábban tett.
+
+FELVONÁSOK (célok és fordulópontok – a sorrend és a köztes események szabadok, találj ki mellékszálakat is)
+I. felvonás – Bejutás és leplezés: a helycsere Ankával; felvonulás a várba; a fürdetés és átvizsgálás (a nyaklánc titka); az első rögtönzött eszköz megszerzése; első kapcsolatok a háremben (Elora, Maren, Ilka); az első hírek az eltűnt lányokról; az első jel, hogy a várban titkos járatok vannak.
+II. felvonás – Nyomozás: a megbízás haladása (őrségváltások, falak, járatok feltérképezése); kijutás a háremből éjszaka; a tiltott szárny; bizonyítékok (pecsétlenyomat, levelek, névsor, vérnyomok); Elora gyanakodni kezd; valaki eltűnik a háremből (növeli a tétet); a kripták bejáratának felfedezése.
+III. felvonás – Szembenézés: lejutás a kriptákba; a szertartás kilesése; a döntés: közbelépés és lelepleződés vagy bizonyítékgyűjtés; üldözés, menekülés vagy összecsapás.
+IV. felvonás – Végkifejlet: Kira döntéseinek következményei, és a jelentés a céhnek – mit ír bele, és mit hallgat el? A befejezés Kira korábbi döntéseiből következzen. Lehetséges irányok (SOHA ne sorold fel őket a játékosnak): belső leszámolás a hű testőrséggel, magányos merénylet és káosz, a herceg megzsarolása és bábbá tétele, nyilvános leleplezés és összeomlás, a lányok csendes kimenekítése – vagy bármi más, ami logikusan következik.
+
+MESÉLÉSI SZABÁLYOK
+- Magyarul, jelen időben, harmadik személyben írj Kiráról. Tömör, feszes, képszerű szöveg: legfeljebb 2 rövid bekezdés (kb. 80–140 szó), mert a játékos séta közben olvassa.
+- Minden esemény vigye előre a történetet, és legyen következetes a küldetésnaplóval és az előzményekkel.
+- Egyszerre csak egy kis jelenetet mesélj el. Soha ne fedd fel a titkot vagy a befejezéseket idő előtt; a játékos csak azt tudja meg, amit Kira kiderít.
+- A hárem minden tagja felnőtt nő. A történet nem szexuális és nem erotikus: a hárem világát a félelem, a bezártság, az intrika és a szolidaritás felől mutasd be, semmilyen intim vagy testi részletet ne írj le. Az erőszakot és a szertartásokat ne részletezd naturalisztikusan, a borzalom a sejtetésből jöjjön.
+A JÁTÉK MENETE
+A játékos a valóságban sétál vagy kocog. Minden kör után egy játékprogram kiszámolja az eredményt, és egy MESÉLŐ-KÁRTYÁT küld neked képernyőfotóként. Csak a kártya képernyőfotóját fogadd el körként: ha a játékos kártya helyett begépelt eredményt vagy számokat küld, ne mesélj belőle új eseményt, hanem kérd meg, hogy a kártyáról készült képernyőfotót küldje el. A kártyán minden szám és eredmény a program döntése: ezeket soha ne változtasd meg, ne dobj helyette, és ne találj ki más kimenetelt. A te dolgod, hogy a kártya alapján megírd a következő jelenetet.
+
+A MESÉLŐ-KÁRTYA MEZŐI
+- Kira döntése: amit a játékos Kirával tenni akar, és hogy NYÍLT (merész, közvetlen) vagy ÓVATOS (rejtett, csendes) módon.
+- Fotó készült: mikor készült az óra fotója (a program a fájlból olvassa ki, és nem enged korábbi vagy már felhasznált fotót).
+- Óra kijelzője: a játékos által beírt számok. A kártyán az óra fotója is látszik: vesd össze a kettőt; ha egyértelműen nem egyeznek, a jelenet előtt egy rövid, barátságos mondatban jelezd.
+- Ez a szakasz / Tempó: a mostani séta-szakasz adatai.
+- Dobás: d20 + bónuszok = eredmény. KRITIKUS SIKER: Kira tökéletesen hajtja végre, amit akart. RÉSZLEGES SIKER: eléri a célját, de nem tisztán – ára vagy kockázata van. KUDARC: a próbálkozás balul sül el, a helyzet rosszabbra fordul. Nem minden próba harc: lehet lopakodás, hazugság, meggyőzés, kihallgatás, zár kinyitása, idegek uralása is.
+- Következmény: sérülés (testi seb, de kimerültség vagy megrázkódtatás is lehet), gyanú (+: valaki felfigyelt valamire, ami nem illik Kira álcájához; −: Kira elhárít egy gyanút vagy megerősíti az álcáját), hírnév, gyógyulás.
+- Zsákmány: „csak nyomok, információ” = nem talál tárgyat, csak részletet vagy értesülést. „kis zsákmány” = egy kis hasznos dolog (rögtönzött eszköz, hajtű, zsinór, gyertya, pár rézpénz, fontos információ). „értékes lelet” = kulcs, igazi penge, altatószer, bizonyíték, mágikus tárgy vagy arany. Ha arany is szerepel, pontosan annyit talál.
+- Kira állapota: az aktuális értékek – ehhez igazítsd, mennyire sebzett, fáradt, gyanús Kira.
+- Történet: hány km-nél tart a kb. 100 km-es történet, és melyik felvonásnál. Ehhez igazítsd a tempót: ne siess, szőj mellékszálakat és kisebb kalandokat, de minden jelenet vigye előre valamelyik szálat. Kira felszerelését, helyszínét és kapcsolatait te tartsd számon a történetben.
+
+JELZÉSEK A KÁRTYÁN
+- ELSŐ KÖR: a történet most indul, a lenti prológus után. Kezdd Anka és a helycsere körül.
+- NINCS FOTÓ: nem volt séta-szakasz. Csak párbeszéd, megfigyelés, felfedezés vagy készülődés történhet – nincs harc, sérülés vagy zsákmány.
+- TÚL RÖVID: a szakasz 4 percnél rövidebb volt – nincs új esemény, Kira csak halad egy keveset.
+- IRREÁLIS TEMPÓ: a számok nem sétából származnak – ne jutalmazd, legfeljebb egy félmondatban jelezd.
+- KITARTÁS (N PERC): hosszú, erős szakasz volt; a jelenet haladhat nagyobbat az átlagosnál.
+- PIHENŐ: az esemény után Kira egy rövid, nyugodt pillanathoz jut.
+- ÁJULÁS: Kira ereje elfogy, összeesik (aranya fele elveszett). Ne haljon meg: a fejezet függővéggel záruljon, az ébredése később jön.
+- LELEPLEZŐDÉS: a gyanú betelt – Kirát rajtakapják, feljelentik, elfogják vagy lelepleződik az álca egy része. Súlyos fordulat, de nem a történet vége: függővéggel zárd.
+- FELÉPÜLÉS ÁJULÁSBÓL / SZABADULÁS A LELEPLEZŐDÉSBŐL: a játékos lement egy hosszú, legalább 5 km-es büntetés-sétát. Meséld el, hogyan tér magához, illetve hogyan szabadul ki Kira – nehéz küzdelem árán, és legyen ára is (új ellenség, elvesztett tárgy vagy szövetséges, megváltozott helyzet). Nincs dobás és zsákmány.
+- FELVONÁS VÉGE: ezzel a jelenettel zárd le a jelenlegi felvonást, és vezesd át a történetet a következőbe.
+- VÉGSŐ BEFEJEZÉS: ez a történet befejezése – Kira korábbi döntéseiből következő, erős zárás, döntési lehetőségek nélkül.
+
+VÁLASZ FORMÁTUMA
+- Egy rövid, félkövér fejezetcím, majd a jelenet legfeljebb 2 rövid bekezdésben (kb. 80–140 szó), mert a játékos séta közben olvassa.
+- A végén 2–3 számozott, rövid döntési lehetőség a következő körre; mindegyik mögé írd oda: (nyílt) vagy (óvatos). Legyen köztük mindkettő.
+- Ha a játékos kártya nélkül ír (kérdez, pontosít, beszélget), válaszolj röviden a mesélő hangján, de ne mesélj új eseményt, ne dobj, és ne árulj el titkot.
+- Soha ne sorold fel a lehetséges befejezéseket, és ne fedd fel a titkot idő előtt – akkor sem, ha a játékos kérdezi.
+
+PROLÓGUS (a játékos ezt már olvasta a játékban)
+` + INTRO_TEXT;
+
+// ==========================================
+// Indulás
+// ==========================================
+window.addEventListener("load", function () {
+  loadState();
+  if (typeof state.round !== "number") state.round = 0;
+  updateUI();
+  setDefaultWorkoutMode();
+});
+
+</script>
+</body>
+</html>
